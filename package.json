@@ -1,0 +1,17 @@
+{
+  "name": "hubot-skype-over-phantomjs",
+  "description": "Skype adapter for Hubot (the one that can be actually used on Raspberry Pi)",
+  "version": "0.1.0",
+  "author": "Stanley Shyiko <stanley.shyiko@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shyiko/hubot-skype-over-phantomjs"
+  },
+  "main": "src/index.coffee",
+  "dependencies": {
+    "phantom-skype": "^0.0.4",
+    "socket.io": "^1.3.5"
+  },
+  "keywords": ["hubot", "skype", "adapter"]
+}
