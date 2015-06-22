@@ -14,9 +14,9 @@ npm install hubot-skype-over-phantomjs --save
 # Usage
 
 ```sh
-HUBOT_SKYPE_USERNAME=<username> HUBOT_SKYPE_PASSWORD=<password> hubot ... \
+HUBOT_SKYPE_USERNAME=<microsoft_account> HUBOT_SKYPE_PASSWORD=<password> hubot ... \
   --adapter skype-over-phantomjs
-``` 
+```
 
 ## License
 
