@@ -10,7 +10,7 @@
   },
   "main": "src/index.coffee",
   "dependencies": {
-    "phantom-skype": "^0.0.4",
+    "phantom-skype": "^0.1.0",
     "socket.io": "^1.3.5"
   },
   "keywords": ["hubot", "skype", "adapter"]
