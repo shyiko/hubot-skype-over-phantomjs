@@ -13,7 +13,7 @@ class Skype extends Adapter
     @connector.send(envelope.user.room, str) for str in strings
 
   reply: (envelope, strings...) ->
-    handle = "@#{envelope.user.name.replace(' ', '')}"
+    handle = "@#{envelope.user.name.replace(/[ ]/g, '')}"
     @connector.send(envelope.user.room, "#{handle} #{str}") for str in strings
 
   run: ->
