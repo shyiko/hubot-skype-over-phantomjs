@@ -15,6 +15,7 @@ class SkypeConnector extends EventEmitter
       @socket
         .on 'initialized', =>
           @socket.on 'message', (data) =>
+            return console.warn('Unexpected ' + JSON.stringify(data)) unless data.message?.info?.text
             @emit 'message',
               id: data.message.id
               conversationId: data.conversationId
