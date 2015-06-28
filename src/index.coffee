@@ -13,7 +13,8 @@ class Skype extends Adapter
     @connector.send(envelope.user.room, str) for str in strings
 
   reply: (envelope, strings...) ->
-    @connector.send(envelope.user.room, "@#{envelope.user.name} #{str}") for str in strings
+    handle = "@#{envelope.user.name.replace(' ', '')}"
+    @connector.send(envelope.user.room, "#{handle} #{str}") for str in strings
 
   run: ->
     @robot.logger.debug "Skype adapter options: #{JSON.stringify @options}"
