@@ -1,40 +1,11 @@
 {Adapter, TextMessage, User} = require 'hubot'
+uuid = require 'node-uuid'
+
 SkypeConnector = require './connector'
 
-skypeBrainIdPrefix = "skype_message_"
-skypeUrlSuffix = "/hubot/skype/"
+truncateIfNeeded = (msg, ending, limit) ->
+  msg.slice(0, limit - ending.length);
 
-###
-  Unique message Id generator
-###
-uuid = do ->
-  counter = 0
-  ->
-    counter++
-    "#{(new Date).getTime()}#{counter}xxxxxxxx"
-    .replace(/x/g, () -> (Math.random() * 10 | 0).toString())
-
-###
-  Truncates msg (not breaking the words) and
-  adds 'stringToAdd' (if defined) so that
-  resuling string length doesn't exceed given limit
-###
-truncateGracefully = (msg, stringToAdd, limit) ->
-  buffer = []
-  len = if stringToAdd? then stringToAdd.length else 0
-  for w in msg.split(/\b/)
-    len += w.length
-    break if len > limit
-    buffer.push w
-
-  buffer.push stringToAdd if stringToAdd?
-  buffer.join("")
-
-###
-  Skype adapter for hubot
-  has possibility to trim messages to specified length
-  and provide the link to the full message
-###
 class Skype extends Adapter
 
   constructor: (robot) ->
@@ -42,16 +13,27 @@ class Skype extends Adapter
     @options =
       username: process.env.HUBOT_SKYPE_USERNAME
       password: process.env.HUBOT_SKYPE_PASSWORD
-      limit: process.env.HUBOT_SKYPE_MESSAGE_LIMIT
-      excess: process.env.HUBOT_SKYPE_LINK_EXCESS
-      url: process.env.HUBOT_SKYPE_BASE_URL
+      limit: process.env.HUBOT_SKYPE_MESSAGE_LIMIT || 1000
+      link: process.env.HUBOT_SKYPE_MESSAGE_LINK is 'on'
+      linkBaseURL: (process.env.HUBOT_SKYPE_MESSAGE_LINK_BASE_URL or '').
+        replace(/\/$/, '')
 
   send: (envelope, strings...) ->
-    @preprocessAndSend(envelope.user.room, str) for str in strings
+    limit = @options.limit
+    for msg in strings
+      if limit && msg.length > limit
+        if @options.link
+          id = uuid.v1()
+          @robot.brain.set("skype_message_#{id}", msg)
+          msg = truncateIfNeeded(msg,
+            "\n ... view full: #{@options.linkBaseURL}/skype/relay/#{id}", limit)
+        else
+          msg = truncateIfNeeded(msg, '', limit)
+      @connector.send(envelope.user.room, msg)
 
   reply: (envelope, strings...) ->
     handle = "@#{envelope.user.name.replace(/[ ]/g, '')}"
-    @preprocessAndSend(envelope.user.room, "#{handle} #{str}") for str in strings
+    send(envelope, ("#{handle} #{str}" for str in strings)...)
 
   run: ->
     @robot.logger.debug "Skype adapter options: #{JSON.stringify @options}"
@@ -68,33 +50,10 @@ class Skype extends Adapter
   close: ->
     @connector.disconnect()
 
-  ###
-  Depending on environment settings truncates message
-  to specified length and optionally adds link to the
-  full version
-  ###
-  preprocessAndSend: (room, msg) ->
-    limit = @options.limit
-    if @options.excess && limit? && msg.length > limit
-      id = uuid()
-      @robot.brain.set(skypeBrainIdPrefix + id, msg)
-      msg = truncateGracefully(msg,
-        "\n ... view full: #{@options.url}#{skypeUrlSuffix}#{id}", limit)
-    else if limit? && msg.length > limit
-      msg = truncateGracefully(msg, null, limit)
-
-    @connector.send(room, msg)
-
 exports.use = (robot) ->
-  ###
-  If HUBOT_SKYPE_LINK_EXCESS is provided
-  registers hubout http endpoint that returns
-  full versions of truncated messages
-  ###
-  if process.env.HUBOT_SKYPE_LINK_EXCESS?
-    robot.router.get "#{skypeUrlSuffix}:id", (req, res) ->
-      id = skypeBrainIdPrefix + req.params.id.replace(/[^\d]/g, "_")
+  if process.env.HUBOT_SKYPE_MESSAGE_LINK is 'on'
+    robot.router.get "/skype/relay/:id", (req, res) ->
       res.setHeader 'content-type', 'text/plain; charset=utf-8'
-      res.send robot.brain.get(id)
+      res.send robot.brain.get("skype_message_#{req.params.id}")
 
   new Skype robot

@@ -14,19 +14,16 @@ npm install hubot-skype-over-phantomjs --save
 # Usage
 
 ```sh
-HUBOT_SKYPE_USERNAME=<microsoft_account> HUBOT_SKYPE_PASSWORD=<password> hubot ... \
-  --adapter skype-over-phantomjs
+hubot --adapter skype-over-phantomjs
 ```
 
-# Optional parameters
+# Configuration
 
-* ```HUBOT_SKYPE_MESSAGE_LIMIT=800``` — truncates the message to specified length. 
-* ```HUBOT_SKYPE_LINK_EXCESS=true``` — used in conjuction with ```HUBOT_SKYPE_MESSAGE_LIMIT```. 
-  If message is truncated stores it's full version in hubot brain and provides http link to it.
-* ```HUBOT_SKYPE_BASE_URL=http://my.hubot.domain:8080``` — To use in conjunction with previous parameter.
-  Protocol, domain and port where hubot is listening to http requests. 
-  Without slash in the end. Basically the first part part of the generated url that points to the full 
-   version of truncated message.
+* HUBOT_SKYPE_USERNAME - Microsoft account (email).
+* HUBOT_SKYPE_PASSWORD - Password.
+* HUBOT_SKYPE_MESSAGE_LIMIT - Maximum length of the message from Hubot (after which it gets truncated). `1000` characters by default. 
+* HUBOT_SKYPE_MESSAGE_LINK — Indicates whether to add a link to the full response (stored in brain) in case message exceeds HUBOT_SKYPE_MESSAGE_LIMIT. `off` by default.
+* HUBOT_SKYPE_MESSAGE_LINK_BASE_URL — Hubot's base URL (e.g. http://hubot.mycompany.com:8080).    
 
 ## License
 
