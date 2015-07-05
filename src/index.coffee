@@ -33,7 +33,7 @@ class Skype extends Adapter
 
   reply: (envelope, strings...) ->
     handle = "@#{envelope.user.name.replace(/[ ]/g, '')}"
-    send(envelope, ("#{handle} #{str}" for str in strings)...)
+    @send(envelope, ("#{handle} #{str}" for str in strings)...)
 
   run: ->
     @robot.logger.debug "Skype adapter options: #{JSON.stringify @options}"
