@@ -3,8 +3,10 @@ uuid = require 'node-uuid'
 
 SkypeConnector = require './connector'
 
-truncateIfNeeded = (msg, ending, limit) ->
-  msg.slice(0, limit - ending.length);
+truncateIfNeeded = (msg, ending, limit) -> msg.
+  split('\n').
+  reduce(((r, v) -> if r.length < limit then r + '\n' + v else r), '').
+  slice(0, limit - ending.length) + ending;
 
 class Skype extends Adapter
 
@@ -26,7 +28,7 @@ class Skype extends Adapter
           id = uuid.v1()
           @robot.brain.set("skype_message_#{id}", msg)
           msg = truncateIfNeeded(msg,
-            "\n ... view full: #{@options.linkBaseURL}/skype/relay/#{id}", limit)
+            "\n... for complete response go to #{@options.linkBaseURL}/skype/relay/#{id}", limit)
         else
           msg = truncateIfNeeded(msg, '', limit)
       @connector.send(envelope.user.room, msg)
